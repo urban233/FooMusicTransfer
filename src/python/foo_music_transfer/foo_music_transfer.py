@@ -1,17 +1,8 @@
 """Module that can sync local music files with a ftp to a remote device."""
+import argparse
 import ftplib
 import os
 import pathlib
-
-# <editor-fold desc="FTP data (User depended)">
-FTP_HOST = "192.168.40.98"
-FTP_PORT = 21
-FTP_USER = "test"
-FTP_PASSWORD = "1234"  # often no password is used
-
-LOCAL_MUSIC_DIR = r"F:\music_storage\dj_music\collection_crate\type\house\bass"
-REMOTE_MUSIC_DIR = "/foobar2000 Music Folder"
-# </editor-fold>
 
 
 def upload_file(ftp: ftplib.FTP, local_file_path, remote_file_path) -> None:
@@ -93,13 +84,44 @@ def delete_remote_directory(ftp, remote_dir):
 
 
 if __name__ == "__main__":
-  # <editor-fold desc="FTP connection setup">
-  ftp = ftplib.FTP()
-  ftp.connect(FTP_HOST, FTP_PORT)
-  ftp.login(FTP_USER, FTP_PASSWORD)
+  # Create an ArgumentParser object
+  parser = argparse.ArgumentParser(description='A simple argparse example')
+  # Add arguments
+  parser.add_argument('--input', nargs='+', help='Input file')
+  parser.add_argument('--ip', nargs='+', help='IP address of iPhone')
+  parser.add_argument('--port', nargs='?', help='Port of iPhone (Foobar2000) ftp')
+  parser.add_argument('--user', nargs='?', help='Username of iPhone (Foobar2000) ftp')
+  parser.add_argument('--password', nargs='+', help='Password of iPhone (Foobar2000) ftp')
+  # Parse arguments
+  args = parser.parse_args()
+  # <editor-fold desc="FTP data (User depended)">
+  if args.ip is None:
+    raise ValueError("Please specify an IP address!")
+  FTP_HOST = args.ip[0]  # "192.168.40.98"
+  if args.port is None:
+    FTP_PORT = 21
+  else:
+    FTP_PORT = args.port
+  if args.user is None:
+    FTP_USER = "generic"
+  else:
+    FTP_USER = args.user
+  if args.password is None:
+    raise ValueError("Please specify a password!")
+  FTP_PASSWORD = args.password[0]
+  if args.input is None:
+    raise ValueError("Please specify an input path!")
+  LOCAL_MUSIC_DIR = args.input[0]
+  REMOTE_MUSIC_DIR = "/foobar2000 Music Folder"
+
   # </editor-fold>
-  # <editor-fold desc="File syncing">
-  ftp.cwd(REMOTE_MUSIC_DIR)
-  sync_directories(ftp, LOCAL_MUSIC_DIR, REMOTE_MUSIC_DIR)
-  ftp.quit()
-  # </editor-fold>
+  # # <editor-fold desc="FTP connection setup">
+  # ftp = ftplib.FTP()
+  # ftp.connect(FTP_HOST, FTP_PORT)
+  # ftp.login(FTP_USER, FTP_PASSWORD)
+  # # </editor-fold>
+  # # <editor-fold desc="File syncing">
+  # ftp.cwd(REMOTE_MUSIC_DIR)
+  # sync_directories(ftp, LOCAL_MUSIC_DIR, REMOTE_MUSIC_DIR)
+  # ftp.quit()
+  # # </editor-fold>
