@@ -1,0 +1,8 @@
+[ftp]
+host = "192.168.40.98"
+port = 21
+user = "test"
+password = "1234"
+
+[input]
+input_path = "path/to/the/directory/to/sync"
