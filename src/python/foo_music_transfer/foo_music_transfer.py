@@ -85,7 +85,7 @@ def delete_remote_directory(ftp, remote_dir):
 
 if __name__ == "__main__":
   # Create an ArgumentParser object
-  parser = argparse.ArgumentParser(description='A simple argparse example')
+  parser = argparse.ArgumentParser()
   # Add arguments
   parser.add_argument('--input', nargs='+', help='Input file')
   parser.add_argument('--ip', nargs='+', help='IP address of iPhone')
@@ -101,27 +101,27 @@ if __name__ == "__main__":
   if args.port is None:
     FTP_PORT = 21
   else:
-    FTP_PORT = args.port
+    FTP_PORT = int(args.port)
   if args.user is None:
     FTP_USER = "generic"
   else:
     FTP_USER = args.user
   if args.password is None:
     raise ValueError("Please specify a password!")
-  FTP_PASSWORD = args.password[0]
+  FTP_PASSWORD = str(args.password[0])
   if args.input is None:
     raise ValueError("Please specify an input path!")
   LOCAL_MUSIC_DIR = args.input[0]
   REMOTE_MUSIC_DIR = "/foobar2000 Music Folder"
 
   # </editor-fold>
-  # # <editor-fold desc="FTP connection setup">
-  # ftp = ftplib.FTP()
-  # ftp.connect(FTP_HOST, FTP_PORT)
-  # ftp.login(FTP_USER, FTP_PASSWORD)
-  # # </editor-fold>
-  # # <editor-fold desc="File syncing">
-  # ftp.cwd(REMOTE_MUSIC_DIR)
-  # sync_directories(ftp, LOCAL_MUSIC_DIR, REMOTE_MUSIC_DIR)
-  # ftp.quit()
-  # # </editor-fold>
+  # <editor-fold desc="FTP connection setup">
+  ftp = ftplib.FTP()
+  ftp.connect(FTP_HOST, FTP_PORT)
+  ftp.login(FTP_USER, FTP_PASSWORD)
+  # </editor-fold>
+  # <editor-fold desc="File syncing">
+  ftp.cwd(REMOTE_MUSIC_DIR)
+  sync_directories(ftp, LOCAL_MUSIC_DIR, REMOTE_MUSIC_DIR)
+  ftp.quit()
+  # </editor-fold>
