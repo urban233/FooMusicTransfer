@@ -1,10 +1,10 @@
 #
-# TEA - Task Event-based Async library for Python
+# Foo Music Transfer - Software for transferring music to a foobar2000 mobile device.
+#
 # Copyright (C) 2024
 # Martin Urban (martin.urban@studmail.w-hs.de)
-# Hannah Kullik (hannah.kullik@studmail.w-hs.de)
 #
-# Source code is available at <https://github.com/urban233/TEA>
+# Source code is available at <https://github.com/urban233/FooMusicTransfer>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

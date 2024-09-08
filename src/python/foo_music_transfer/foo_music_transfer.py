@@ -1,27 +1,56 @@
+#
+# Foo Music Transfer - Software for transferring music to a foobar2000 mobile device.
+#
+# Copyright (C) 2024
+# Martin Urban (martin.urban@studmail.w-hs.de)
+#
+# Source code is available at <https://github.com/urban233/FooMusicTransfer>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 """Module that can sync local music files with a ftp to a remote device."""
-import argparse
 import ftplib
 import os
 import pathlib
 import subprocess
 import sys
 import time
+import toml
 from dataclasses import dataclass
 
-import toml
+__docformat__ = "google"
 
 
 @dataclass
 class Arguments:
   """Arguments that are needed for the transfer."""
+
+  # <editor-fold desc="Class attributes">
   _input: str
+  """The path to the input directory."""
   _ip: str
+  """The ip address of the device."""
   _port: int
+  """The port number the ftp uses."""
   user: str
+  """The username the ftp uses."""
   password: str
+  """The password the ftp uses."""
+  # </editor-fold>
 
   def __init__(self) -> None:
-    """Initialize an empty object."""
+    """Constructor."""
     self._input = ""
     self._ip = ""
     self._port = -1
@@ -29,54 +58,149 @@ class Arguments:
     self.password = ""
 
   def get_input(self) -> str:
-    """Gets the input path."""
+    """Gets the input path.
+
+    Returns:
+      The path to the input directory.
+    """
     return self._input
 
   def get_ip(self) -> str:
-    """Gets the ip address."""
+    """Gets the ip address.
+
+    Returns:
+      The ip address.
+    """
     return self._ip
 
   def get_port(self) -> int:
-    """Gets the port number."""
+    """Gets the port number.
+
+    Returns:
+      The port number.
+    """
     return self._port
 
   def set_input(self, an_input: str) -> None:
-    """Set the input."""
-    if pathlib.Path(an_input).exists():
-      self._input = an_input
-    else:
-      raise ValueError("Invalid filepath!")
+    """Sets the input.
+
+    Args:
+      an_input: The path to the input directory.
+
+    Raises:
+      ValueError: If an_input is None, an empty string or an invalid path.
+    """
+    # <editor-fold desc="Checks">
+    if an_input is None:
+      raise ValueError("an_input is None.")
+    if an_input == "":
+      raise ValueError("an_input is an empty string.")
+    if not pathlib.Path(an_input).exists():
+      raise ValueError("Invalid path!")
+    # </editor-fold>
+    self._input = an_input
 
   def set_ip(self, an_ip: str) -> None:
-    """Set the ip."""
-    if an_ip.count(".") == 3:
-      self._ip = an_ip
-    else:
+    """Sets the ip.
+
+    Args:
+      an_ip: The ip address of the ftp server.
+
+    Raises:
+      ValueError: If an_ip is None, an empty string or an invalid ip address.
+    """
+    # <editor-fold desc="Checks">
+    if an_ip is None:
+      raise ValueError("an_ip is None.")
+    if an_ip == "":
+      raise ValueError("an_ip is an empty string.")
+    if not an_ip.count(".") == 3:
       raise ValueError("Invalid IP format!")
+    # </editor-fold>
+    self._ip = an_ip
 
-  def set_port(self, an_port: str) -> None:
-    """Set the port."""
-    if int(an_port) > 0:
-      self._port = int(an_port)
-    else:
+  def set_port(self, a_port: str) -> None:
+    """Set the port.
+
+    Args:
+      a_port: The port number of the ftp server.
+
+    Raises:
+      ValueError: If a_port is None, an empty string or an invalid port number.
+    """
+    # <editor-fold desc="Checks">
+    if a_port is None:
+      raise ValueError("a_port is None.")
+    if a_port == "":
+      raise ValueError("a_port is an empty string.")
+    if not int(a_port) > 0:
       raise ValueError("Invalid port number!")
+    # </editor-fold>
+    self._port = int(a_port)
 
 
-def upload_file(ftp: ftplib.FTP, local_file_path, remote_file_path) -> None:
-  """Uploads a file."""
-  with open(local_file_path, "rb") as file:
-    ftp.storbinary(f'STOR {remote_file_path}', file)
+def upload_file(a_ftp: ftplib.FTP, a_local_file_path, a_remote_file_path) -> None:
+  """Uploads a file.
+
+  Args:
+    a_ftp: The ftp server connection.
+    a_local_file_path: The local filepath of the music file to be uploaded to.
+    a_remote_file_path: The remote filepath, where the music file should be stored.
+
+  Raises:
+    ValueError: If a_ftp is None or a_local_file_path is None, an empty string or an invalid path, or if a_remote_file_path is None or an empty string.
+  """
+  # <editor-fold desc="Checks">
+  if a_ftp is None:
+    raise ValueError("a_ftp is None.")
+  if a_local_file_path is None:
+    raise ValueError("a_local_file_path is None.")
+  if a_local_file_path == "":
+    raise ValueError("a_local_file_path is an empty string.")
+  if not pathlib.Path(a_local_file_path).exists():
+    raise ValueError("a_local_file_path could not be found!")
+  if a_remote_file_path is None:
+    raise ValueError("a_remote_file_path is None.")
+  if a_remote_file_path == "":
+    raise ValueError("a_remote_file_path is an empty string.")
+  # </editor-fold>
+  with open(a_local_file_path, "rb") as file:
+    a_ftp.storbinary(f'STOR {a_remote_file_path}', file)
 
 
-def sync_directories(ftp, local_dir, remote_dir) -> None:
-  remote_files = ftp.nlst(remote_dir)
+def sync_directories(a_ftp, a_local_dir, a_remote_dir) -> None:
+  """Syncs the local directory with the remote one.
 
-  for root, dirs, files in os.walk(local_dir):
-    relative_path = os.path.relpath(root, local_dir)
-    remote_path = str(pathlib.PurePosixPath(remote_dir) / relative_path.replace("\\", "/"))
+  Args:
+    a_ftp: The ftp server connection.
+    a_local_dir: The path to the local directory.
+    a_remote_dir: The path to the remote directory.
+
+  Raises:
+    ValueError: If a_ftp is None or a_local_dir is None, an empty string or an invalid path, or if a_remote_dir is None or an empty string.
+  """
+  # <editor-fold desc="Checks">
+  if a_ftp is None:
+    raise ValueError("a_ftp is None.")
+  if a_local_dir is None:
+    raise ValueError("a_local_dir is None.")
+  if a_local_dir == "":
+    raise ValueError("a_local_dir is an empty string.")
+  if not pathlib.Path(a_local_dir).exists():
+    raise ValueError("a_local_dir could not be found!")
+  if a_remote_dir is None:
+    raise ValueError("a_remote_dir is None.")
+  if a_remote_dir == "":
+    raise ValueError("a_remote_dir is an empty string.")
+  # </editor-fold>
+  remote_files = a_ftp.nlst(a_remote_dir)
+
+  for root, dirs, files in os.walk(a_local_dir):
+    relative_path = os.path.relpath(root, a_local_dir)
+    remote_path = str(pathlib.PurePosixPath(a_remote_dir) / relative_path.replace("\\", "/"))
 
     try:
-      ftp.mkd(remote_path)
+      a_ftp.mkd(remote_path)
     except ftplib.error_perm as e:
       print(f"Directory {remote_path} already exists.")
 
@@ -86,33 +210,69 @@ def sync_directories(ftp, local_dir, remote_dir) -> None:
       remote_file_path = str(pathlib.PurePosixPath(remote_path) / file)
       if remote_file_path not in remote_files:
         print(f"Uploading '{local_file_path}' to '{remote_file_path}'")
-        upload_file(ftp, local_file_path, remote_file_path)
+        upload_file(a_ftp, local_file_path, remote_file_path)
 
     for remote_file in remote_files:
       if remote_file not in files:
         full_remote_path = str(pathlib.PurePosixPath(remote_path) / remote_file)
-        if is_file(ftp, full_remote_path):
+        if is_file(a_ftp, full_remote_path):
           print(f"Deleting {remote_file} from remote directory.")
-          ftp.delete(full_remote_path)
+          a_ftp.delete(full_remote_path)
         else:
           print(f"Deleting remote directory {remote_file}.")
-          delete_remote_directory(ftp, full_remote_path)
+          delete_remote_directory(a_ftp, full_remote_path)
 
 
-def is_file(ftp, path):
+def is_file(a_ftp, a_path) -> bool:
+  """Checks if the given path is a file.
+
+  Args:
+    a_ftp: The ftp server connection.
+    a_path: The path to check.
+
+  Returns:
+    True if the path is a filepath, False otherwise.
+
+  Raises:
+    ValueError: If a_ftp is None or a_path is None, an empty string.
+  """
+  # <editor-fold desc="Checks">
+  if a_ftp is None:
+    raise ValueError("a_ftp is None.")
+  if a_path is None:
+    raise ValueError("a_path is None.")
+  if a_path == "":
+    raise ValueError("a_path is an empty string.")
+  # </editor-fold>
   try:
-    ftp.size(path)  # Returns the file size if it's a file
+    a_ftp.size(a_path)  # Returns the file size if it's a file
     return True
   except ftplib.error_perm:
     return False
 
 
-def delete_remote_directory(ftp, remote_dir):
-  # List the contents of the directory
+def delete_remote_directory(a_ftp, a_remote_dir) -> None:
+  """Deletes a (full) remote directory.
+
+  Args:
+    a_ftp: The ftp server connection.
+    a_remote_dir: The path to the remote directory.
+
+  Raises:
+    ValueError: If a_ftp is None or a_remote_dir is None, an empty string.
+  """
+  # <editor-fold desc="Checks">
+  if a_ftp is None:
+    raise ValueError("a_ftp is None.")
+  if a_remote_dir is None:
+    raise ValueError("a_remote_dir is None.")
+  if a_remote_dir == "":
+    raise ValueError("a_remote_dir is an empty string.")
+  # </editor-fold>
   try:
-    files = ftp.nlst(remote_dir)
+    files = a_ftp.nlst(a_remote_dir)
   except ftplib.error_perm as e:
-    print(f"Error listing directory {remote_dir}: {e}")
+    print(f"Error listing directory {a_remote_dir}: {e}")
     return
 
   for file in files:
@@ -120,37 +280,27 @@ def delete_remote_directory(ftp, remote_dir):
     if file in [".", ".."]:
       continue
 
-    full_path = str(pathlib.PurePosixPath(remote_dir) / file)
+    full_path = str(pathlib.PurePosixPath(a_remote_dir) / file)
 
     try:
       # Check if it's a directory by trying to change into it
-      ftp.cwd(full_path)
+      a_ftp.cwd(full_path)
       # It's a directory, so recurse into it
-      delete_remote_directory(ftp, full_path)
+      delete_remote_directory(a_ftp, full_path)
     except ftplib.error_perm:
       # It's a file, so delete it
       print(f"Deleting file: {full_path}")
-      ftp.delete(full_path)
+      a_ftp.delete(full_path)
 
   # Once the directory is empty, delete it
-  print(f"Removing directory: {remote_dir}")
+  print(f"Removing directory: {a_remote_dir}")
   try:
-    ftp.rmd(remote_dir)
+    a_ftp.rmd(a_remote_dir)
   except ftplib.error_perm as e:
-    print(f"Error removing directory {remote_dir}: {e}")
+    print(f"Error removing directory {a_remote_dir}: {e}")
 
 
 if __name__ == "__main__":
-  # Create an ArgumentParser object
-  # parser = argparse.ArgumentParser()
-  # # Add arguments
-  # parser.add_argument('--input', nargs='+', help='Input file')
-  # parser.add_argument('--ip', nargs='+', help='IP address of iPhone')
-  # parser.add_argument('--port', nargs='?', help='Port of iPhone (Foobar2000) ftp')
-  # parser.add_argument('--user', nargs='?', help='Username of iPhone (Foobar2000) ftp')
-  # parser.add_argument('--password', nargs='+', help='Password of iPhone (Foobar2000) ftp')
-  # # Parse arguments
-  # args = parser.parse_args()
   args = Arguments()
   try:
     print("+++-----------------------------------------------+++")
@@ -205,14 +355,19 @@ if __name__ == "__main__":
   LOCAL_MUSIC_DIR = args.get_input()
   REMOTE_MUSIC_DIR = "/foobar2000 Music Folder"
   # </editor-fold>
-  # <editor-fold desc="FTP connection setup">
-  ftp = ftplib.FTP()
-  ftp.connect(FTP_HOST, FTP_PORT)
-  ftp.login(FTP_USER, FTP_PASSWORD)
-  # </editor-fold>
-  # <editor-fold desc="File syncing">
-  ftp.cwd(REMOTE_MUSIC_DIR)
-  sync_directories(ftp, LOCAL_MUSIC_DIR, REMOTE_MUSIC_DIR)
-  ftp.quit()
-  # </editor-fold>
-  input("Transfer completed. Press any key to close.")
+  try:
+    # <editor-fold desc="FTP connection setup">
+    ftp = ftplib.FTP()
+    ftp.connect(FTP_HOST, FTP_PORT)
+    ftp.login(FTP_USER, FTP_PASSWORD)
+    # </editor-fold>
+    # <editor-fold desc="File syncing">
+    ftp.cwd(REMOTE_MUSIC_DIR)
+    sync_directories(ftp, LOCAL_MUSIC_DIR, REMOTE_MUSIC_DIR)
+    ftp.quit()
+    # </editor-fold>
+    input("\nTransfer completed. Press any key to close.")
+  except Exception as e:
+    print(f"An error occurred: {e}")
+    input("Press any key to close.")
+    sys.exit(1)
