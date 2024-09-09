@@ -24,7 +24,7 @@
 
 ## What is Foo Music Transfer?
 
-> Foo Music Transfer is a music transfer application that works<br>
+> Foo Music Transfer is a music transfer application that works 
 > with an offline music library and the iOS version of Foobar2000.
 
 ## Overview<a id="overview"></a>
@@ -62,6 +62,8 @@ If you plan to use the same configuration in the future,
 you can use a configuration file. Access this by pressing
 the `e` key (mnemonic for **e**dit configuration) when the program prompts you to choose
 an action.
+
+**IMPORTANT**: You **must** use double backslashes if you enter a path for the `input_path`!
 
 You can then edit the configuration file and add your
 preferred settings for future use.
