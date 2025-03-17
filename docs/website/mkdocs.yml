@@ -1,0 +1,4 @@
+site_name: My site
+site_url: https://urban233.github.io/FooMusicTransfer/
+theme:
+  name: material
