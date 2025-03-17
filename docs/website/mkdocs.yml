@@ -1,4 +1,18 @@
-site_name: My site
+site_name: Foo Music Transfer
 site_url: https://urban233.github.io/FooMusicTransfer/
 theme:
   name: material
+  logo: assets/logo256.png
+  favicon: assets/logo256.png
+  palette:
+    primary: black
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.blocks.caption
+
+plugins: [] # Hides the top search bar
