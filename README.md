@@ -6,6 +6,7 @@
 | [**Getting Started**](#getting-started)
 | [**Source**](#source)
 | [**Contribute**](#contribute)
+| [**Website**](https://urban233.github.io/FooMusicTransfer/)
 
 > [!IMPORTANT]
 > 📣 **Foo Music Transfer is a CLI tool and has NO graphical user interface!** 📣
