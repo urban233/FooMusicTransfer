@@ -28,12 +28,10 @@ jobs:
 
       - name: Download Inno Setup installer
         run: |
-          Invoke-WebRequest -Uri https://jrsoftware.org/download.php/is-6.2.1.exe -OutFile inno-setup.exe
+          Invoke-WebRequest -Uri https://files.jrsoftware.org/is/6/innosetup-6.4.2.exe -OutFile inno-setup.exe
 
       - name: Install Inno Setup
         run: |
-          pwd
-          ls
           .\inno-setup.exe /SILENT /DIR=C:\InnoSetup
 
       - name: Add Inno Setup to PATH
