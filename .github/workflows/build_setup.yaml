@@ -32,11 +32,11 @@ jobs:
 
       - name: Install Inno Setup
         run: |
-          .\inno-setup.exe /SILENT /DIR=C:\InnoSetup
+          .\inno-setup.exe /SILENT
 
       - name: Add Inno Setup to PATH
         run: |
-          $env:PATH += ";C:\InnoSetup"
+          $env:PATH += ";C:\Program Files (x86)\Inno Setup 6"
 
       - name: Build extension
         run: |
