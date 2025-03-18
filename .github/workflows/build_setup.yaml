@@ -32,6 +32,8 @@ jobs:
 
       - name: Install Inno Setup
         run: |
+          pwd
+          ls
           .\inno-setup.exe /SILENT /DIR=C:\InnoSetup
 
       - name: Add Inno Setup to PATH
