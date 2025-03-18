@@ -47,9 +47,12 @@ def build(c):
     tmp_logo_filepath = pathlib.Path(f"{tmp_project_root_path}/assets/logo.ico")
     shutil.copy(tmp_logo_filepath, tmp_inno_setup_input_path / "logo.ico")
     # Compile inno setup script
-    tmp_inno_setup_compiler_filepath = r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
-    subprocess.run([tmp_inno_setup_compiler_filepath, f"{tmp_project_root_path}/src/inno_setup/setup.iss"])
-    shutil.rmtree(tmp_inno_setup_input_path)
+    tmp_inno_setup_compiler_filepath = pathlib.Path(r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe")
+    if tmp_inno_setup_compiler_filepath.exists():
+      subprocess.run([tmp_inno_setup_compiler_filepath, f"{tmp_project_root_path}/src/inno_setup/setup.iss"])
+      shutil.rmtree(tmp_inno_setup_input_path)
+    else:
+      print("Inno setup compiler not found in default location. Please compile the script yourself.")
   except Exception as e:
     print(f"Error while running 'build' task: {e}")
   finally:

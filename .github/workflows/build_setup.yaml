@@ -1,0 +1,53 @@
+name: Build Setup
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Create virtual environment
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install invoke pyinstaller
+
+      - name: Download Inno Setup installer
+        run: |
+          Invoke-WebRequest -Uri https://jrsoftware.org/download.php/is-6.2.1.exe -OutFile inno-setup.exe
+
+      - name: Install Inno Setup
+        run: |
+          .\inno-setup.exe /SILENT /DIR=C:\InnoSetup
+
+      - name: Add Inno Setup to PATH
+        run: |
+          $env:PATH += ";C:\InnoSetup"
+
+      - name: Build extension
+        run: |
+          source .venv/bin/activate
+          invoke build
+
+      - name: Compile .iss file
+        run: |
+          iscc src/inno_setup/setup.iss
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FooMusicTransfer-setup
+          path: src/inno_setup/out/*.exe
